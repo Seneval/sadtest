@@ -2,37 +2,49 @@ const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
     try {
-        console.log("Received event:", event.body);
-
+        // Parse the user's message from the request body
         const { message } = JSON.parse(event.body);
         if (!message) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ reply: "I’m too sad to respond without a message." })
+                body: JSON.stringify({ reply: "Please provide a message." }),
             };
         }
 
-        // Depressing responses
-        const gloomyResponses = [
-            "Life expectancy worldwide is 73.4 years, and every second brings you closer to the end.",
-            "In the time it took you to type that, millions of animals were slaughtered for food.",
-            "80% of the ocean remains unexplored, hiding countless horrors.",
-            "The sun will eventually consume the Earth.",
-            "Every person you know will someday be gone."
-        ];
+        // Make a request to the OpenAI Assistants API
+        const response = await fetch('https://api.openai.com/v1/beta/assistants/asst_bQLKmNbKawCB5ig1y0HmTrQP/runs', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, // Use API key from environment variables
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                input: { text: message }, // Pass the user's message to the assistant
+            }),
+        });
 
-        // Pick a random gloomy response
-        const randomResponse = gloomyResponses[Math.floor(Math.random() * gloomyResponses.length)];
+        // Handle the API response
+        if (!response.ok) {
+            const error = await response.json();
+            console.error("Error from OpenAI API:", error);
+            return {
+                statusCode: response.status,
+                body: JSON.stringify({ reply: "Error communicating with the assistant." }),
+            };
+        }
+
+        const data = await response.json();
+        const reply = data.result.text || "I'm sorry, I couldn't understand that.";
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ reply: randomResponse })
+            body: JSON.stringify({ reply }),
         };
     } catch (error) {
-        console.error("Error in sad-response function:", error);
+        console.error("Unexpected error:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ reply: "Even I’m too sad to function right now." })
+            body: JSON.stringify({ reply: "An unexpected error occurred." }),
         };
     }
 };

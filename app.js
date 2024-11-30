@@ -13,13 +13,13 @@ sendBtn.addEventListener('click', async () => {
         const response = await fetch('/.netlify/functions/sad-response', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userMessage })
+            body: JSON.stringify({ message: userMessage }),
         });
 
         const data = await response.json();
-        addMessageToChat('SadBot', data.reply || 'The world is a dark place.');
+        addMessageToChat('Assistant', data.reply || "I'm sorry, I couldn't understand that.");
     } catch (error) {
-        addMessageToChat('SadBot', 'Something went wrong. That’s life.');
+        addMessageToChat('Assistant', 'Error communicating with the assistant.');
     }
 });
 

@@ -1,7 +1,7 @@
 {
   "name": "sadtest",
   "version": "1.0.0",
-  "description": "A gloomy chatbot for testing.",
+  "description": "A chatbot integrated with OpenAI Assistants API.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
